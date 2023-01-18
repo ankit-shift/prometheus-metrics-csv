@@ -7,9 +7,6 @@ import sys
 from dateutil.parser import parse
 from datetime import timedelta  
 from multiprocessing import Process, Manager, Lock
-
-# Initialize Global Mutex Variables    
-dateArray = []
    
 if len(sys.argv) != 5:
     print('PrometheusURL: {0} https://promethues_host:9090'.format(sys.argv[1]))
@@ -31,11 +28,12 @@ except :
     print('DateFormat Error : expected "2022-10-17T09:30:55Z" recieved {0}'.format(sys.argv[1]))   
 
 def createDailyBatches(startDate,endDate):
-    global dateArray
+    dateArray = []
     flaggedDate = startDate
     while flaggedDate < endDate :
         dateArray.append([flaggedDate.strftime('%Y-%m-%dT%H:%M:%SZ'), (flaggedDate + timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%SZ')])
         flaggedDate += timedelta(days=1,seconds=1)
+    return dateArray
 
 def printQueryRangeHeaderLabels(results, writer, dictionary, lock):
     if dictionary['writeHeader'] == False or 'labels' in dictionary:
@@ -93,7 +91,7 @@ def processMetric(metric):
             dictionary = manager.dict()
             dictionary['writeHeader'] = True
             writer = csv.writer(file)
-            createDailyBatches(startDate,endDate)
+            dateArray = createDailyBatches(startDate,endDate)
             functionalReferences = [lambda i=i: processQueryRange(metric, i[0], i[1], writer, dictionary, lock) for i in dateArray]
             print('Initiated :',len(functionalReferences),'routines created for metric ', metric)
             run_parallel(*functionalReferences)
