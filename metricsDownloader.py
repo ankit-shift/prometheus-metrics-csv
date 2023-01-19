@@ -25,7 +25,8 @@ try :
     endDate = parse(sys.argv[3])
     metrics = sys.argv[4].split(',') 
 except :
-    print('DateFormat Error : expected "2022-10-17T09:30:55Z" recieved {0}'.format(sys.argv[1]))   
+    print('DateFormat Error : expected "2022-10-17T09:30:55Z" recieved {0}'.format(sys.argv[1]))
+    sys.exit(1)  
 
 def createDailyBatches(startDate,endDate):
     dateArray = []
